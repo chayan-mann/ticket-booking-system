@@ -1,7 +1,8 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, BadRequestException } from "@nestjs/common";
 import { CreateBookingDto } from "./dto/create-booking.dto";
 import { PrismaService } from "src/common/database/prisma.service";
 import { InternalServerErrorException } from "@nestjs/common";
+import { Prisma } from "src/generated/prisma/client.js";
 
 @Injectable()
 export class BookingsService {
@@ -25,27 +26,42 @@ export class BookingsService {
   
     return this.prisma.$transaction(async (tx) => {
       /**
-       * 1. PESSIMISTIC LOCK ON SHOW_SEAT
+       * 1. VALIDATE THAT ALL SHOW SEATS EXIST FOR THIS SHOW
        */
-      const lockedSeats = await tx.$queryRaw<
-        { id: string }[]
-      >`
+      const showSeats = await tx.showSeat.findMany({
+        where: {
+          id: { in: seatIds },
+          showId: showId,
+        },
+      });
+
+      /**
+       * 2. FAIL FAST IF ANY SEAT IS MISSING OR INVALID
+       */
+      if (showSeats.length !== seatIds.length) {
+        const foundIds = showSeats.map(s => s.id);
+        const missingIds = seatIds.filter(id => !foundIds.includes(id));
+        throw new BadRequestException(
+          `Invalid or unavailable seats: ${missingIds.join(', ')}. Expected ${seatIds.length} seats, found ${showSeats.length}.`
+        );
+      }
+
+      /**
+       * 3. PESSIMISTIC LOCK ON SHOW_SEAT USING RAW SQL
+       * Lock the seats we validated to prevent concurrent modifications
+       * Using Prisma.join to properly handle the array
+       */
+      const seatIdFragments = seatIds.map(id => Prisma.sql`${id}`);
+      const lockedSeats = await tx.$queryRaw<{ id: string }[]>`
         SELECT id
         FROM "ShowSeat"
-        WHERE id = ANY(${seatIds})
+        WHERE id IN (${Prisma.join(seatIdFragments, ', ')})
           AND "showId" = ${showId}
         FOR UPDATE
       `;
   
       /**
-       * 2. FAIL FAST IF ANY SEAT IS MISSING
-       */
-      if (lockedSeats.length !== seatIds.length) {
-        throw new Error("One or more seats are invalid or unavailable");
-      }
-  
-      /**
-       * 3. CHECK IF ANY SEAT IS ALREADY BOOKED
+       * 4. CHECK IF ANY SEAT IS ALREADY BOOKED
        * Enforced by @@unique([showSeatId]) on BookingSeat
        */
       const existingBooking = await tx.bookingSeat.findFirst({
@@ -55,11 +71,11 @@ export class BookingsService {
       });
   
       if (existingBooking) {
-        throw new Error("One or more seats already booked");
+        throw new BadRequestException("One or more seats are already booked");
       }
   
       /**
-       * 4. CREATE BOOKING
+       * 5. CREATE BOOKING
        * (PENDING will come later)
        */
       const booking = await tx.booking.create({
@@ -72,7 +88,7 @@ export class BookingsService {
       });
   
       /**
-       * 5. MAP SEATS TO BOOKING
+       * 6. MAP SEATS TO BOOKING
        */
       await tx.bookingSeat.createMany({
         data: seatIds.map((showSeatId) => ({
@@ -82,7 +98,7 @@ export class BookingsService {
       });
   
       /**
-       * 6. COMMIT (implicit)
+       * 7. COMMIT (implicit)
        */
       return {
         bookingId: booking.id,
