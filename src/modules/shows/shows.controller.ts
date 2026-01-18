@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, InternalServerErrorException, Param, Post, Query } from "@nestjs/common";
 import { ShowsService } from "./shows.service";
 import { CreateShowDto } from "./dto/create-show.dto";
 
@@ -9,9 +9,9 @@ export class ShowsController {
   @Get()
   listShows(
     @Query("movieId") movieId?: string,
-    @Query("theatreId") theatreId?: string,
+    @Query("screenId") screenId?: string,
   ) {
-    return this.showsService.listShows({ movieId, theatreId });
+      return this.showsService.listShows({ movieId, screenId });
   }
 
   @Get(":id")
