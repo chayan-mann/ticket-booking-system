@@ -1,20 +1,31 @@
 import { Injectable } from "@nestjs/common";
 import { CreateMovieDto } from "./dto/create-movie.dto";
+import { Movie } from "src/generated/prisma/client";
+import { PrismaService } from "src/common/database/prisma.service";
 
 @Injectable()
 export class MoviesService {
-  listMovies() {
-    // TODO: replace with Prisma query once DB is wired
-    return [];
+  constructor(private readonly prisma: PrismaService) {}
+
+  async listMovies() {
+    const movieList = await this.prisma.movie.findMany();
+    return movieList
   }
 
-  getMovie(id: string) {
-    // TODO: replace with Prisma query once DB is wired
-    return { id };
+  async getMovie(id: string) {
+    const movie = await this.prisma.movie.findUnique({
+      where: { id },
+    });
+    return movie;
   }
 
-  createMovie(dto: CreateMovieDto) {
-    // TODO: replace with Prisma create once DB is wired
-    return { id: "temp-movie-id", ...dto };
+  async createMovie(dto: CreateMovieDto) {
+    const movie = await this.prisma.movie.create({
+      data: {
+        title: dto.title,
+        durationMin: dto.durationMin,
+      },
+    });
+    return movie;
   }
 }
