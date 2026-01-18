@@ -1,10 +1,16 @@
 import { PrismaClient } from "../src/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { config } from "dotenv";
+import { Pool } from "pg";
 
+config(); 
 
-const prisma = new PrismaClient();
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log(" Starting seed...");
+  console.log("🌱 Starting seed...");
 
   // Clean existing data in order (respecting foreign keys)
   await prisma.bookingSeat.deleteMany();
@@ -18,7 +24,7 @@ async function main() {
   await prisma.movie.deleteMany();
   await prisma.user.deleteMany();
 
-  console.log("Cleaned existing data");
+  console.log("✅ Cleaned existing data");
 
   // Create Users
   const user1 = await prisma.user.create({
@@ -104,7 +110,8 @@ async function main() {
   console.log("✅ Created screens");
 
   // Create Seats for Screen 1 (10 rows, 10 seats each = 100 seats)
-  const screen1Seats = [];
+  const screen1Seats: Array<{ screenId: string; row: string; number: number }> =
+    [];
   for (const row of ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]) {
     for (let num = 1; num <= 10; num++) {
       screen1Seats.push({
@@ -117,7 +124,8 @@ async function main() {
   await prisma.seat.createMany({ data: screen1Seats });
 
   // Create Seats for Screen 2 (8 rows, 10 seats each = 80 seats)
-  const screen2Seats = [];
+  const screen2Seats: Array<{ screenId: string; row: string; number: number }> =
+    [];
   for (const row of ["A", "B", "C", "D", "E", "F", "G", "H"]) {
     for (let num = 1; num <= 10; num++) {
       screen2Seats.push({
@@ -130,7 +138,8 @@ async function main() {
   await prisma.seat.createMany({ data: screen2Seats });
 
   // Create Seats for Screen 3 (12 rows, 10 seats each = 120 seats)
-  const screen3Seats = [];
+  const screen3Seats: Array<{ screenId: string; row: string; number: number }> =
+    [];
   for (const row of [
     "A",
     "B",
