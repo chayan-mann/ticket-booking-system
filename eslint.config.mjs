@@ -30,7 +30,7 @@ export default tseslint.config(
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-unsafe-argument': 'warn',
       "prettier/prettier": "off",
-      "unused-imports/no-unused-imports": "off",
+      "unused-imports/no-unused-imports": "warn",
       "unused-imports/no-unused-vars": "off",
       "unused-imports/no-unused-vars-ts": "off",
       "unused-imports/no-unused-vars-tsx": "off",
