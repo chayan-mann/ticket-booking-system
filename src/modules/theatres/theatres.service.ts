@@ -1,20 +1,32 @@
 import { Injectable } from "@nestjs/common";
 import { CreateTheatreDto } from "./dto/create-theatre.dto";
+import { PrismaService } from "src/common/database/prisma.service";
+import { Theatre } from "src/generated/prisma/client";
+import { InternalServerErrorException } from "@nestjs/common";
 
 @Injectable()
 export class TheatresService {
-  listTheatres() {
-    // TODO: replace with Prisma query once DB is wired
-    return [];
+  constructor(private readonly prisma: PrismaService) {}
+
+  async listTheatres() {
+    const theatreList = await this.prisma.theatre.findMany();
+    return theatreList;
   }
 
-  getTheatre(id: string) {
-    // TODO: replace with Prisma query once DB is wired
-    return { id };
+  async getTheatre(id: string) {
+    const theatre = await this.prisma.theatre.findUnique({
+      where: { id },
+    });
+    return theatre;
   }
 
-  createTheatre(dto: CreateTheatreDto) {
-    // TODO: replace with Prisma create once DB is wired
-    return { id: "temp-theatre-id", ...dto };
+  async createTheatre(dto: CreateTheatreDto) {
+    const theatre = await this.prisma.theatre.create({
+      data: {
+        name: dto.name,
+        city: dto.city,
+      },
+    });
+    return theatre;
   }
 }
