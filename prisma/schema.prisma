@@ -1,0 +1,178 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+////////////////////
+/// CORE ENTITIES ///
+////////////////////
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  bookings Booking[]
+  payments Payment[]
+}
+
+model Movie {
+  id          String   @id @default(uuid())
+  title       String
+  durationMin Int
+  createdAt   DateTime @default(now())
+
+  shows Show[]
+}
+
+model Theatre {
+  id        String   @id @default(uuid())
+  name      String
+  city      String
+  createdAt DateTime @default(now())
+
+  screens Screen[]
+}
+
+model Screen {
+  id         String   @id @default(uuid())
+  name       String
+  theatreId  String
+  capacity   Int
+  createdAt  DateTime @default(now())
+
+  theatre Theatre @relation(fields: [theatreId], references: [id])
+  seats    Seat[]
+  shows    Show[]
+
+  @@unique([theatreId, name])
+}
+
+////////////////////
+/// SEAT LAYOUT  ///
+////////////////////
+
+model Seat {
+  id        String   @id @default(uuid())
+  screenId  String
+  row       String
+  number    Int
+  createdAt DateTime @default(now())
+
+  screen Screen @relation(fields: [screenId], references: [id])
+  showSeats ShowSeat[]
+  @@unique([screenId, row, number])
+}
+
+////////////////////
+/// SHOWS        ///
+////////////////////
+
+model Show {
+  id         String   @id @default(uuid())
+  movieId    String
+  screenId   String
+  startTime  DateTime
+  createdAt  DateTime @default(now())
+
+  movie  Movie  @relation(fields: [movieId], references: [id])
+  screen Screen @relation(fields: [screenId], references: [id])
+
+  showSeats ShowSeat[]
+  bookings  Booking[]
+
+  @@unique([screenId, startTime])
+}
+
+////////////////////
+/// SHOW SEATS   ///
+////////////////////
+
+model ShowSeat {
+  id        String   @id @default(uuid())
+  showId    String
+  seatId    String
+
+  createdAt DateTime @default(now())
+
+  show Show @relation(fields: [showId], references: [id])
+  seat Seat @relation(fields: [seatId], references: [id])
+  payments Payment[]
+  bookings BookingSeat[]
+
+  @@unique([showId, seatId])
+}
+
+////////////////////
+/// BOOKINGS     ///
+////////////////////
+
+model Booking {
+  id             String        @id @default(uuid())
+  userId         String
+  showId         String
+  status         BookingStatus
+  paymentRef     String
+  createdAt      DateTime      @default(now())
+
+  user  User @relation(fields: [userId], references: [id])
+  show  Show @relation(fields: [showId], references: [id])
+  payments Payment[]
+  seats BookingSeat[]
+
+  @@unique([paymentRef])
+}
+
+model BookingSeat {
+  id          String   @id @default(uuid())
+  bookingId  String
+  showSeatId String
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+  showSeat ShowSeat @relation(fields: [showSeatId], references: [id])
+
+  @@unique([showSeatId])
+}
+
+////////////////////
+/// PAYMENTS    ///
+////////////////////
+
+model Payment {
+  id            String        @id @default(uuid())
+  userId        String
+  amount        Int
+  status        PaymentStatus
+  reference     String        @unique
+  createdAt     DateTime      @default(now())
+
+  user      User      @relation(fields: [userId], references: [id])
+  bookings  Booking[]
+  showSeats ShowSeat[]
+}
+
+////////////////////
+/// ENUMS       ///
+////////////////////
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  INITIATED
+  SUCCESS
+  FAILED
+}
