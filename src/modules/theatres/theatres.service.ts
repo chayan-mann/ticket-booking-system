@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { CreateTheatreDto } from "./dto/create-theatre.dto";
 import { PrismaService } from "src/common/database/prisma.service";
-import { Theatre } from "src/generated/prisma/client";
+import { Theatre } from "src/generated/prisma/client.js";
 import { InternalServerErrorException } from "@nestjs/common";
 
 @Injectable()

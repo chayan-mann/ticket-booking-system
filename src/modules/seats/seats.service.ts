@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { SeatAvailabilityQueryDto } from "./dto/seat-availability-query.dto";
 import { PrismaService } from "src/common/database/prisma.service";
-import { Seat } from "src/generated/prisma/client";
+import { Seat } from "src/generated/prisma/client.js";
 import { InternalServerErrorException } from "@nestjs/common";
 @Injectable()
 export class SeatsService {

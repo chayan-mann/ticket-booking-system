@@ -1,15 +1,9 @@
-import * as dotenv from "dotenv";
-import * as path from "path";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { ValidationPipe, VersioningType } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { ConfigService } from "@nestjs/config";
 import { Logger } from "@nestjs/common";
-
-
-// Load .env from project root
-dotenv.config({ path: path.join(__dirname, "../../../.env") });
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -18,14 +12,13 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
 
-
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix("api");
 
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: "1",
   });
-  
+
   // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
@@ -34,7 +27,7 @@ async function bootstrap() {
       transform: true,
       transformOptions: {
         enableImplicitConversion: true,
-      }, 
+      },
     }),
   );
 

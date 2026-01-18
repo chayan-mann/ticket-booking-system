@@ -1,12 +1,11 @@
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
 }
-
 
 model User {
   id        String   @id @default(uuid())
@@ -36,15 +35,15 @@ model Theatre {
 }
 
 model Screen {
-  id         String   @id @default(uuid())
-  name       String
-  theatreId  String
-  capacity   Int
-  createdAt  DateTime @default(now())
+  id        String   @id @default(uuid())
+  name      String
+  theatreId String
+  capacity  Int
+  createdAt DateTime @default(now())
 
   theatre Theatre @relation(fields: [theatreId], references: [id])
-  seats    Seat[]
-  shows    Show[]
+  seats   Seat[]
+  shows   Show[]
 
   @@unique([theatreId, name])
 }
@@ -58,19 +57,20 @@ model Seat {
   number    Int
   createdAt DateTime @default(now())
 
-  screen Screen @relation(fields: [screenId], references: [id])
+  screen    Screen     @relation(fields: [screenId], references: [id])
   showSeats ShowSeat[]
+
   @@unique([screenId, row, number])
 }
 
 /// SHOWS        ///
 
 model Show {
-  id         String   @id @default(uuid())
-  movieId    String
-  screenId   String
-  startTime  DateTime
-  createdAt  DateTime @default(now())
+  id        String   @id @default(uuid())
+  movieId   String
+  screenId  String
+  startTime DateTime
+  createdAt DateTime @default(now())
 
   movie  Movie  @relation(fields: [movieId], references: [id])
   screen Screen @relation(fields: [screenId], references: [id])
@@ -86,14 +86,14 @@ model Show {
 ////////////////////
 
 model ShowSeat {
-  id        String   @id @default(uuid())
-  showId    String
-  seatId    String
+  id     String @id @default(uuid())
+  showId String
+  seatId String
 
   createdAt DateTime @default(now())
 
-  show Show @relation(fields: [showId], references: [id])
-  seat Seat @relation(fields: [seatId], references: [id])
+  show     Show          @relation(fields: [showId], references: [id])
+  seat     Seat          @relation(fields: [seatId], references: [id])
   payments Payment[]
   bookings BookingSeat[]
 
@@ -105,27 +105,27 @@ model ShowSeat {
 ////////////////////
 
 model Booking {
-  id             String        @id @default(uuid())
-  userId         String
-  showId         String
-  status         BookingStatus
-  paymentRef     String
-  createdAt      DateTime      @default(now())
+  id         String        @id @default(uuid())
+  userId     String
+  showId     String
+  status     BookingStatus
+  paymentRef String
+  createdAt  DateTime      @default(now())
 
-  user  User @relation(fields: [userId], references: [id])
-  show  Show @relation(fields: [showId], references: [id])
+  user     User          @relation(fields: [userId], references: [id])
+  show     Show          @relation(fields: [showId], references: [id])
   payments Payment[]
-  seats BookingSeat[]
+  seats    BookingSeat[]
 
   @@unique([paymentRef])
 }
 
 model BookingSeat {
-  id          String   @id @default(uuid())
+  id         String @id @default(uuid())
   bookingId  String
   showSeatId String
 
-  booking Booking @relation(fields: [bookingId], references: [id])
+  booking  Booking  @relation(fields: [bookingId], references: [id])
   showSeat ShowSeat @relation(fields: [showSeatId], references: [id])
 
   @@unique([showSeatId])
@@ -136,14 +136,14 @@ model BookingSeat {
 ////////////////////
 
 model Payment {
-  id            String        @id @default(uuid())
-  userId        String
-  amount        Int
-  status        PaymentStatus
-  reference     String        @unique
-  createdAt     DateTime      @default(now())
+  id        String        @id @default(uuid())
+  userId    String
+  amount    Int
+  status    PaymentStatus
+  reference String        @unique
+  createdAt DateTime      @default(now())
 
-  user      User      @relation(fields: [userId], references: [id])
+  user      User       @relation(fields: [userId], references: [id])
   bookings  Booking[]
   showSeats ShowSeat[]
 }

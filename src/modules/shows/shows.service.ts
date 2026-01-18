@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { CreateShowDto } from "./dto/create-show.dto";
 import { PrismaService } from "src/common/database/prisma.service";
-import { Show } from "src/generated/prisma/client";
+import { Show } from "src/generated/prisma/client.js";
 import { InternalServerErrorException } from "@nestjs/common";
 
 @Injectable()

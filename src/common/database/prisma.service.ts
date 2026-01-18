@@ -1,11 +1,20 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '../../generated/prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
+import { Injectable, OnModuleInit } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { PrismaClient } from "../../generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg"; 
 
 @Injectable()
-export class PrismaService extends PrismaClient {
-  constructor() {
-    const adapter = new PrismaPg({ url: process.env.DATABASE_URL });
+export class PrismaService extends PrismaClient implements OnModuleInit {
+  constructor(private configService: ConfigService) {
+    const connectionString = process.env.DATABASE_URL;
+    
+    const pool = new Pool({ connectionString });
+    const adapter = new PrismaPg(pool);
     super({ adapter });
+  }
+
+  async onModuleInit() {
+    await this.$connect();
   }
 }
