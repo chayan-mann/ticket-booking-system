@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -13,10 +7,6 @@ datasource db {
   provider = "postgresql"
 }
 
-
-////////////////////
-/// CORE ENTITIES ///
-////////////////////
 
 model User {
   id        String   @id @default(uuid())
@@ -59,9 +49,7 @@ model Screen {
   @@unique([theatreId, name])
 }
 
-////////////////////
 /// SEAT LAYOUT  ///
-////////////////////
 
 model Seat {
   id        String   @id @default(uuid())
@@ -75,9 +63,7 @@ model Seat {
   @@unique([screenId, row, number])
 }
 
-////////////////////
 /// SHOWS        ///
-////////////////////
 
 model Show {
   id         String   @id @default(uuid())
