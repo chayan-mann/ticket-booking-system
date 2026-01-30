@@ -2,6 +2,55 @@
 
 A production-ready movie ticket booking system with **complete payment integration**, **seat hold mechanism**, and **pessimistic locking** to prevent double bookings.
 
+## ✨ Features
+
+### 🔒 Concurrency Control
+
+With pessimistic locking, the system guarantees:
+
+✅ **No double booking** - Only 1 user can book a seat even with 50+ concurrent requests  
+✅ **No race conditions** - Database-level locking prevents conflicts  
+✅ **No concurrent writes** - Seats are locked during transaction  
+✅ **No partial commits** - All-or-nothing booking guarantees
+
+### 💳 Complete Payment Flow
+
+- **Fake Payment Gateway** - Simulates Stripe/Razorpay for development
+- **Webhook Integration** - HMAC-SHA256 signature verification
+- **Idempotent Processing** - Prevents duplicate webhook handling
+- **Refund Support** - Time-based refund calculations
+
+### 🪑 Seat Hold Mechanism
+
+- **5-minute holds** - Temporary reservations while selecting seats
+- **Auto-expiry** - Automatic cleanup of expired holds
+- **Visual indicators** - Shows `available`, `held`, `held_by_me`, `booked`
+
+### ⏱️ Automated Background Jobs
+
+- **Booking expiry** (every minute) - Auto-cancel expired PENDING bookings
+- **Hold cleanup** (every 5 mins) - Remove expired seat holds
+- **Data archival** (daily 3 AM) - Cleanup old booking data
+
+### 🎯 Booking Lifecycle
+
+```
+PENDING (15 min) → Payment Success → CONFIRMED
+PENDING (15 min) → Payment Failed  → Extended (retry)
+PENDING (15 min) → Payment Expired → EXPIRED
+PENDING (15 min) → Timeout         → EXPIRED (cron job)
+PENDING          → User Cancel     → CANCELLED
+CONFIRMED        → Refund Request  → REFUNDED
+```
+
+## 💻 Tech Stack
+
+- **NestJS** 11.x - Backend framework
+- **PostgreSQL** - Database with pessimistic locking
+- **Prisma** 7.x - ORM with raw SQL for critical sections
+- **@nestjs/schedule** - Cron job management
+- **TypeScript** - Type safety
+
 ## 🔄 Booking Flow Architecture
 
 ```
@@ -231,54 +280,7 @@ A production-ready movie ticket booking system with **complete payment integrati
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## ✨ Features
 
-### 🔒 Concurrency Control
-
-With pessimistic locking, the system guarantees:
-
-✅ **No double booking** - Only 1 user can book a seat even with 50+ concurrent requests  
-✅ **No race conditions** - Database-level locking prevents conflicts  
-✅ **No concurrent writes** - Seats are locked during transaction  
-✅ **No partial commits** - All-or-nothing booking guarantees
-
-### 💳 Complete Payment Flow
-
-- **Fake Payment Gateway** - Simulates Stripe/Razorpay for development
-- **Webhook Integration** - HMAC-SHA256 signature verification
-- **Idempotent Processing** - Prevents duplicate webhook handling
-- **Refund Support** - Time-based refund calculations
-
-### 🪑 Seat Hold Mechanism
-
-- **5-minute holds** - Temporary reservations while selecting seats
-- **Auto-expiry** - Automatic cleanup of expired holds
-- **Visual indicators** - Shows `available`, `held`, `held_by_me`, `booked`
-
-### ⏱️ Automated Background Jobs
-
-- **Booking expiry** (every minute) - Auto-cancel expired PENDING bookings
-- **Hold cleanup** (every 5 mins) - Remove expired seat holds
-- **Data archival** (daily 3 AM) - Cleanup old booking data
-
-### 🎯 Booking Lifecycle
-
-```
-PENDING (15 min) → Payment Success → CONFIRMED
-PENDING (15 min) → Payment Failed  → Extended (retry)
-PENDING (15 min) → Payment Expired → EXPIRED
-PENDING (15 min) → Timeout         → EXPIRED (cron job)
-PENDING          → User Cancel     → CANCELLED
-CONFIRMED        → Refund Request  → REFUNDED
-```
-
-## 💻 Tech Stack
-
-- **NestJS** 11.x - Backend framework
-- **PostgreSQL** - Database with pessimistic locking
-- **Prisma** 7.x - ORM with raw SQL for critical sections
-- **@nestjs/schedule** - Cron job management
-- **TypeScript** - Type safety
 
 ## 🚀 Complete Booking Flow
 
