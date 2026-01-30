@@ -383,7 +383,9 @@ describe("Bookings Concurrency & Pessimistic Locking (e2e)", () => {
     it("should have all bookings with valid status", async () => {
       const invalidBookings = await prisma.booking.findMany({
         where: {
-          status: { notIn: ["CONFIRMED", "CANCELLED"] },
+          status: {
+            notIn: ["PENDING", "CONFIRMED", "CANCELLED", "EXPIRED", "REFUNDED"],
+          },
         },
       });
 

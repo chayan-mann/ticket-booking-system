@@ -11,9 +11,14 @@ export class InitiatePaymentDto {
   @MinLength(1)
   bookingId!: string;
 
+  @IsString()
+  @MinLength(1)
+  userId!: string;
+
+  @IsOptional()
   @IsInt()
   @IsPositive()
-  amount!: number;
+  amount?: number;
 
   @IsOptional()
   @IsString()

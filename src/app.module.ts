@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { ScheduleModule } from "@nestjs/schedule";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { PrismaModule } from "./common/database/prisma.module";
@@ -10,6 +11,7 @@ import { ShowsModule } from "./modules/shows/shows.module";
 import { SeatsModule } from "./modules/seats/seats.module";
 import { BookingsModule } from "./modules/bookings/bookings.module";
 import { PaymentsModule } from "./modules/payments/payments.module";
+import { BookingExpiryCronService } from "./common/crons/booking-expiry.cron";
 
 @Module({
   imports: [
@@ -19,6 +21,7 @@ import { PaymentsModule } from "./modules/payments/payments.module";
       load: [configuration],
       expandVariables: true,
     }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     MoviesModule,
     TheatresModule,
@@ -28,6 +31,6 @@ import { PaymentsModule } from "./modules/payments/payments.module";
     PaymentsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, BookingExpiryCronService],
 })
 export class AppModule {}
