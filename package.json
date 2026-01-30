@@ -18,6 +18,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:concurrency": "jest --config ./test/jest-e2e.json bookings-concurrency.e2e-spec.ts",
+    "demo": "./test-demo.sh",
     "prisma:generate": "prisma generate --schema=./prisma/schema.prisma && node scripts/fix-prisma-esm.js",
     "prisma:migrate": "prisma migrate dev --schema=./prisma/schema.prisma",
     "prisma:studio": "prisma studio --schema=./prisma/schema.prisma",
